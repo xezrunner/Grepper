@@ -4,7 +4,7 @@ import SwiftUI
 
 @main
 struct GrepperApp: App {
-    @State var workspaceInfo: WorkspaceInfo = .init()
+    @State var workspaceInfo: WorkspaceInfo = .defaultWorkspace
     
     var body: some Scene {
         WindowGroup {

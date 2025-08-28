@@ -12,6 +12,20 @@ import Foundation
 }
 
 extension WorkspaceInfo {
+    static var defaultWorkspace: WorkspaceInfo {
+        let info = WorkspaceInfo()
+
+        #if DEBUG
+        let url = Bundle.main.url(forResource: "Grepper.debug", withExtension: "dylib")
+        if let url {
+            print("Test file \"Grepper.debug.dylib\" exists - using it for DEBUG default workspace. ")
+            info.addEntry(from: url)
+        }
+        #endif
+        
+        return info
+    }
+    
     public func addEntry(from url: URL) {
         do {
             if try !url.checkResourceIsReachable() {
