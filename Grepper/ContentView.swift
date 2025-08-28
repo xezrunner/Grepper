@@ -2,11 +2,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var workspaceInfo: WorkspaceInfo
+    
     var body: some View {
-        WorkspaceView()
+        WorkspaceView(workspaceInfo: workspaceInfo)
     }
 }
 
 #Preview {
-    ContentView()
+    @Previewable @State var workspaceInfo = WorkspaceInfo()
+    
+    ContentView(workspaceInfo: workspaceInfo)
+        .task {
+            workspaceInfo.entries.append(.init(path: .init(string: "")))
+        }
 }

@@ -1,10 +1,27 @@
 // Grepper::Workspace.swift - 27/08/2025
 import Foundation
 
-struct WorkspaceInfo: Codable, Hashable, Identifiable {
+@Observable class WorkspaceInfo: Codable, Hashable, Identifiable {
     var id: UUID { UUID() }
     
     var entries: [WorkspaceEntry] = []
+    var entrySelection: WorkspaceEntry?
+    
+    public func addEntry(from url: URL) {
+        do {
+            if try !url.checkResourceIsReachable() {
+                print("addEntry(\(url)): URL not reachable")
+            }
+        } catch {
+            print("addEntry(\(url)): \(error)")
+        }
+        
+        let entry = WorkspaceEntry(path: url)
+        entries.append(entry)
+    }
+    
+    static func == (lhs: WorkspaceInfo, rhs: WorkspaceInfo) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 struct WorkspaceEntry: Codable, Hashable, Identifiable {
