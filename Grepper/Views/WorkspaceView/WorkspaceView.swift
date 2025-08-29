@@ -2,7 +2,9 @@
 
 import SwiftUI
 
-enum WorkspaceViewPage: Hashable {
+enum WorkspaceViewPage: Codable, Hashable, Identifiable {
+    var id: UUID { UUID() } // TEMP
+    
     case entry(entry: WorkspaceEntry)
     case entrySettings(entry: WorkspaceEntry)
     case workspaceSettings
@@ -25,10 +27,7 @@ enum WorkspaceViewPage: Hashable {
 }
 
 struct WorkspaceView: View {
-    @State var workspaceInfo: WorkspaceInfo
-    
-    @State var navigationPathForwards: [WorkspaceViewPage] = []
-    @State var navigationPath:         [WorkspaceViewPage] = []
+    var workspaceInfo: WorkspaceInfo
     
     var body: some View {
         NavigationSplitView {
@@ -51,5 +50,5 @@ struct WorkspaceView: View {
 }
 
 #Preview {
-    WorkspaceView(workspaceInfo: .init())
+    WorkspaceView(workspaceInfo: .defaultWorkspace)
 }

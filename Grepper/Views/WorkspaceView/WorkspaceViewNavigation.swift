@@ -1,24 +1,19 @@
 // Grepper::WorkspaceViewNavigation.swift - 28/08/2025
 import SwiftUI
 
-extension WorkspaceView {
+extension WorkspaceInfo {
     var _currentPage: Binding<WorkspaceViewPage?> {
         Binding {
-            navigationPath.last ?? nil
+            self.navigationPath.last ?? nil
         } set: { newValue in
-            pushPage(page: newValue)
+            self.pushPage(page: newValue)
         }
     }
-    var currentPage: WorkspaceViewPage? {
-        get { _currentPage.wrappedValue }
-        set { _currentPage.wrappedValue = newValue }
-    }
+    
     
     func pushPage(page: WorkspaceViewPage?) {
         guard let page else { return }
-        guard page != navigationPath.last else { return }
-        
-        if let entry = page.entry { workspaceInfo.entrySelection = entry }
+        guard page != currentPage else { return }
         
         navigationPath.append(page)
         // Put all forward navigation into path itself, behind the previous entry:
@@ -28,7 +23,7 @@ extension WorkspaceView {
     }
     
     func navigateBack(to index: Int? = nil) {
-        if var index                    {
+        if var index {
             index += 1
             navigationPathForwards.append(contentsOf: navigationPath[index...]); navigationPath.removeSubrange(index...)
         } else if let it = navigationPath.popLast() {
@@ -42,23 +37,28 @@ extension WorkspaceView {
             navigationPath.append(it)
         }
     }
-    
+}
+
+extension WorkspaceView {
     var sidebarNavigationToolbarGroup: some ToolbarContent {
+        let navigationPath = workspaceInfo.navigationPath
+        let navigationPathForwards = workspaceInfo.navigationPathForwards
+        
         // Back/Forward buttons:
         // Since we are using .enumerated() in the ForEaches, we get no automatic updates, so use .id() to re-subscribe to changes
-        ToolbarItemGroup(placement: .navigation) {
+        return ToolbarItemGroup(placement: .navigation) {
             // TODO: visibility based on whether we can navigate in a particular direction
             // TODO: should probably reverse the lists for UI
             // TODO: this would animate nicely in Catalyst...
             if navigationPath.count > 1 {
                 Menu {
                     ForEach(Array(navigationPath.enumerated()), id: \.offset) { index, it in
-                        Button(it.friendlyName) { navigateBack(to: index) }
+                        Button(it.friendlyName) { workspaceInfo.navigateBack(to: index) }
                     }
                 } label: {
                     Label("Backward", systemImage: "chevron.left")
                 } primaryAction: {
-                    navigateBack()
+                    workspaceInfo.navigateBack()
                 }
                 .menuIndicator(.hidden)
                 .id(navigationPath)
@@ -67,12 +67,12 @@ extension WorkspaceView {
             if !navigationPathForwards.isEmpty {
                 Menu {
                     ForEach(Array(navigationPathForwards.enumerated()), id: \.offset) { index, it in
-                        Button(it.friendlyName) { navigateForward(to: index) }
+                        Button(it.friendlyName) { workspaceInfo.navigateForward(to: index) }
                     }
                 } label: {
                     Label("Forward", systemImage: "chevron.right")
                 } primaryAction: {
-                    navigateForward()
+                    workspaceInfo.navigateForward()
                 }
                 .menuIndicator(.hidden)
                 .id(navigationPathForwards)
