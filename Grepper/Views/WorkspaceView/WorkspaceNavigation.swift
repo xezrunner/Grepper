@@ -1,7 +1,10 @@
 // Grepper::WorkspaceViewNavigation.swift - 28/08/2025
 import SwiftUI
 
-extension WorkspaceInfo {
+@Observable class WorkspaceNavigation: Codable {
+    var navigationPathForwards: [WorkspaceViewPage] = []
+    var navigationPath:         [WorkspaceViewPage] = []
+    
     var _currentPage: Binding<WorkspaceViewPage?> {
         Binding {
             self.navigationPath.last ?? nil
@@ -9,7 +12,10 @@ extension WorkspaceInfo {
             self.pushPage(page: newValue)
         }
     }
-    
+    var currentPage: WorkspaceViewPage? {
+        get { _currentPage.wrappedValue }
+        set { _currentPage.wrappedValue = newValue }
+    }
     
     func pushPage(page: WorkspaceViewPage?) {
         guard let page else { return }
@@ -21,6 +27,9 @@ extension WorkspaceInfo {
         navigationPath.insert(contentsOf: navigationPathForwards, at: navigationPath.count - 1)
         navigationPathForwards.removeAll()
     }
+    
+    var canNavigateBack:    Bool {  navigationPath.count > 1 }
+    var canNavigateForward: Bool { !navigationPathForwards.isEmpty }
     
     func navigateBack(to index: Int? = nil) {
         if var index {
@@ -41,41 +50,40 @@ extension WorkspaceInfo {
 
 extension WorkspaceView {
     var sidebarNavigationToolbarGroup: some ToolbarContent {
-        let navigationPath = workspaceInfo.navigationPath
-        let navigationPathForwards = workspaceInfo.navigationPathForwards
+        let navigation = workspaceInfo.navigation
         
         // Back/Forward buttons:
         // Since we are using .enumerated() in the ForEaches, we get no automatic updates, so use .id() to re-subscribe to changes
         return ToolbarItemGroup(placement: .navigation) {
-            // TODO: visibility based on whether we can navigate in a particular direction
-            // TODO: should probably reverse the lists for UI
-            // TODO: this would animate nicely in Catalyst...
-            if navigationPath.count > 1 {
+            // TODO: reverse the lists for UI?
+            // TODO: this could animate nicely in Catalyst...
+            // FIXME: these no longer group when both are visible for some reason...
+            if navigation.canNavigateBack {
                 Menu {
-                    ForEach(Array(navigationPath.enumerated()), id: \.offset) { index, it in
-                        Button(it.friendlyName) { workspaceInfo.navigateBack(to: index) }
+                    ForEach(Array(navigation.navigationPath.enumerated()), id: \.offset) { index, it in
+                        Button(it.friendlyName) { navigation.navigateBack(to: index) }
                     }
                 } label: {
                     Label("Backward", systemImage: "chevron.left")
                 } primaryAction: {
-                    workspaceInfo.navigateBack()
+                    navigation.navigateBack()
                 }
                 .menuIndicator(.hidden)
-                .id(navigationPath)
+                .id(navigation.navigationPath)
             }
             
-            if !navigationPathForwards.isEmpty {
+            if navigation.canNavigateForward {
                 Menu {
-                    ForEach(Array(navigationPathForwards.enumerated()), id: \.offset) { index, it in
-                        Button(it.friendlyName) { workspaceInfo.navigateForward(to: index) }
+                    ForEach(Array(navigation.navigationPathForwards.enumerated()), id: \.offset) { index, it in
+                        Button(it.friendlyName) { navigation.navigateForward(to: index) }
                     }
                 } label: {
                     Label("Forward", systemImage: "chevron.right")
                 } primaryAction: {
-                    workspaceInfo.navigateForward()
+                    navigation.navigateForward()
                 }
                 .menuIndicator(.hidden)
-                .id(navigationPathForwards)
+                .id(navigation.navigationPathForwards)
             }
         }
     }

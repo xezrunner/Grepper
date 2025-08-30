@@ -3,35 +3,24 @@ import SwiftUI
 
 extension WorkspaceView {
     var workspaceSidebar: some View {
-        List(workspaceInfo.entries, selection: workspaceInfo._currentPage) { entry in
+        List(workspaceInfo.entries, selection: navigation._currentPage) { entry in
             let tag = WorkspaceViewPage.entry(entry: entry)
             Text(entry.name).tag(tag)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button { workspaceInfo.pushPage(page: .workspaceSettings) } label: {
+                Button { navigation.pushPage(page: .workspaceSettings) } label: {
                     Label("Workspace settings", systemImage: "gear")
                 }
             }
-            
-            sidebarNavigationToolbarGroup
         }
     }
     
     var workspaceDetail: some View {
-        VStack {
+        return VStack {
             Text("< workspace detail >")
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Text("Workspace \(workspaceInfo.hashValue.description) | entries: \(workspaceInfo.entries.count) | entry: \"\(workspaceInfo.entrySelection?.name ?? "<nil>")\"")
-            }
-            .monospaced()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
-            .background(.black).foregroundStyle(.white)
-        }
+        .toolbar { sidebarNavigationToolbarGroup }
     }
 }
 
@@ -42,3 +31,4 @@ struct WorkspaceView_ListView: View {
         Text("< list view >")
     }
 }
+

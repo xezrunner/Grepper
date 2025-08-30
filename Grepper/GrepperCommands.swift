@@ -2,13 +2,19 @@
 import SwiftUI
 
 enum GrepperCommands {
-    static func MenuBarCommands(with workspaceInfo: WorkspaceInfo?) -> some Commands {
-        CommandGroup(after: .newItem) {
-            Button("Open entry...", systemImage: "arrow.up.right.square") {
-                GrepperCommands.OpenEntry(workspaceInfo: workspaceInfo!)
+    struct MenuBarCommands: Commands {
+        @FocusedValue(WorkspaceInfo.self) var activeWorkspace
+
+        var body: some Commands {
+            CommandGroup(after: .newItem) {
+                Button("Open entry...", systemImage: "arrow.up.right.square") {
+                    if let activeWorkspace {
+                        GrepperCommands.OpenEntry(workspaceInfo: activeWorkspace)
+                    }
+                }
+                .disabled(activeWorkspace == nil)
+                .keyboardShortcut("o", modifiers: .command)
             }
-            .disabled(workspaceInfo == nil)
-            .keyboardShortcut("o", modifiers: .command)
         }
     }
     

@@ -34,7 +34,12 @@ extension WorkspaceView {
                 Text("Start with")
                 
                 Button("File > Open entry") { GrepperCommands.OpenEntry(workspaceInfo: workspaceInfo) }
-                    .buttonStyle(.link).fontWeight(.medium)
+                #if os(macOS)
+                    .buttonStyle(.link)
+                #else
+                    .buttonStyle(.plain)
+                #endif
+                    .fontWeight(.medium)
                 
                 Text(", or drag & drop a file / folder here...").padding(.leading, -3)
             }

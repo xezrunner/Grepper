@@ -28,6 +28,7 @@ enum WorkspaceViewPage: Codable, Hashable, Identifiable {
 
 struct WorkspaceView: View {
     var workspaceInfo: WorkspaceInfo
+    var navigation: WorkspaceNavigation { workspaceInfo.navigation }
     
     var body: some View {
         NavigationSplitView {
@@ -43,12 +44,19 @@ struct WorkspaceView: View {
     }
     
     @ViewBuilder var detail: some View {
-        if workspaceInfo.entries.isEmpty            { emptyDetail }
-        else if workspaceInfo.entrySelection == nil { noSelectionDetail }
-        else                                        { workspaceDetail }
+        Group {
+            if workspaceInfo.entries.isEmpty { emptyDetail }
+            else {
+                if workspaceInfo.currentPage == nil { noSelectionDetail }
+                else                                { workspaceDetail }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .safeAreaInset(edge: .bottom) { if WORKSPACE_UI_DEBUG_STRIP { WorkspaceViewDebugStrip(workspaceInfo: workspaceInfo) } }
     }
 }
 
 #Preview {
     WorkspaceView(workspaceInfo: .defaultWorkspace)
+        .environment(WorkspaceRegistry())
 }

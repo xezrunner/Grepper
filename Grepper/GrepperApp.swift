@@ -2,20 +2,34 @@
 
 import SwiftUI
 
+var WORKSPACE_UI_DEBUG_STRIP = true
+
 @main
 struct GrepperApp: App {
-    @State var workspaceInfo: WorkspaceInfo = .defaultWorkspace
+    @State private var workspaceRegistry = WorkspaceRegistry()
+    
+    @FocusedValue(WorkspaceInfo.self) var activeWorkspace
+    
+    init() {
+//        UserDefaults.standard.setValue(1.0, forKey: "iOSMacScaleFactor")
+//        UserDefaults.standard.setValue(true, forKey: "UIUserInterfaceIdiomMac")
+    }
     
     var body: some Scene {
         WindowGroup {
-            ContentView(workspaceInfo: workspaceInfo)
+            ContentView()
+                .environment(workspaceRegistry)
         }
         .commands {
             SidebarCommands()
-            
-            GrepperCommands.MenuBarCommands(with: workspaceInfo)
+            GrepperCommands.MenuBarCommands()
         }
+        
+        #if os(macOS)
+        UtilityWindow("Workspace Debug", id: WORKSPACE_DEBUG_INSPECTOR_SCENE_ID) {
+            WorkspaceDebugInspectorView(activeWorkspace: activeWorkspace)
+        }
+        .environment(workspaceRegistry)
+        #endif
     }
 }
-
-
