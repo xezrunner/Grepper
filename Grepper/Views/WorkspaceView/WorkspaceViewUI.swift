@@ -3,8 +3,8 @@ import SwiftUI
 
 extension WorkspaceView {
     var workspaceSidebar: some View {
-        List(workspaceInfo.entries, selection: navigation._currentPage) { entry in
-            let tag = WorkspaceViewPage.entry(entry: entry)
+        List(workspace.info.entries, selection: navigation._currentPage) { entry in
+            let tag = WorkspaceViewPage.entry(with: entry)
             Text(entry.name).tag(tag)
         }
         .toolbar {

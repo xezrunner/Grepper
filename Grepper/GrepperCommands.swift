@@ -3,13 +3,13 @@ import SwiftUI
 
 enum GrepperCommands {
     struct MenuBarCommands: Commands {
-        @FocusedValue(WorkspaceInfo.self) var activeWorkspace
+        @FocusedValue(WorkspaceController.self) var activeWorkspace
 
         var body: some Commands {
             CommandGroup(after: .newItem) {
                 Button("Open entry...", systemImage: "arrow.up.right.square") {
                     if let activeWorkspace {
-                        GrepperCommands.OpenEntry(workspaceInfo: activeWorkspace)
+                        GrepperCommands.OpenEntry(for: activeWorkspace)
                     }
                 }
                 .disabled(activeWorkspace == nil)
@@ -18,10 +18,10 @@ enum GrepperCommands {
         }
     }
     
-    static func OpenEntry(workspaceInfo: WorkspaceInfo) {
+    static func OpenEntry(for workspaceController: WorkspaceController) {
         FilePicker.pick(allowDirectories: true) { url in
             guard let url else { return }
-            workspaceInfo.addEntry(from: url, navigate: true)
+            workspaceController.addEntry(from: url, navigate: true)
         }
     }
 }

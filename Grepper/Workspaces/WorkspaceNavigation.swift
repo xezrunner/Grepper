@@ -50,8 +50,6 @@ import SwiftUI
 
 extension WorkspaceView {
     var sidebarNavigationToolbarGroup: some ToolbarContent {
-        let navigation = workspaceInfo.navigation
-        
         // Back/Forward buttons:
         // Since we are using .enumerated() in the ForEaches, we get no automatic updates, so use .id() to re-subscribe to changes
         return ToolbarItemGroup(placement: .navigation) {

@@ -33,7 +33,7 @@ extension WorkspaceView {
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text("Start with")
                 
-                Button("File > Open entry") { GrepperCommands.OpenEntry(workspaceInfo: workspaceInfo) }
+                Button("File > Open entry") { GrepperCommands.OpenEntry(for: workspace) }
                 #if os(macOS)
                     .buttonStyle(.link)
                 #else

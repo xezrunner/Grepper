@@ -8,7 +8,7 @@ var WORKSPACE_UI_DEBUG_STRIP = true
 struct GrepperApp: App {
     @State private var workspaceRegistry = WorkspaceRegistry()
     
-    @FocusedValue(WorkspaceInfo.self) var activeWorkspace
+    @FocusedValue(WorkspaceController.self) var activeWorkspace
     
     init() {
 //        UserDefaults.standard.setValue(1.0, forKey: "iOSMacScaleFactor")

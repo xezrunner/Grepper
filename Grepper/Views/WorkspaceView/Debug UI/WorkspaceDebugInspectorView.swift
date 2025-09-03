@@ -7,14 +7,14 @@ struct WorkspaceDebugInspectorView: View {
     @Environment(\.colorScheme) var colorScheme
     
     //@FocusedValue(WorkspaceInfo.self)
-    var activeWorkspace: WorkspaceInfo?
+    var activeWorkspace: WorkspaceController?
     
-    var _selectedWorkspace: Binding<WorkspaceInfo?> {
+    var _selectedWorkspace: Binding<WorkspaceController?> {
         Binding(
             get: { registry.debugInspector_fromWorkspace},
             set: { newValue in registry.debugInspector_fromWorkspace = newValue })
     }
-    var selectedWorkspace: WorkspaceInfo? { _selectedWorkspace.wrappedValue }
+    var selectedWorkspace: WorkspaceController? { _selectedWorkspace.wrappedValue }
     
     var body: some View {
         NavigationSplitView {
@@ -35,7 +35,7 @@ struct WorkspaceDebugInspectorView: View {
                     }
                     Group {
                         Text(workspace.id.uuidString).monospaced()
-                        Text("Entries: \(workspace.entries.count)").foregroundStyle(.secondary)
+                        Text("Entries: \(workspace.info.entries.count)").foregroundStyle(.secondary)
                     }
                     .font(.footnote)
                 }
@@ -56,28 +56,30 @@ struct WorkspaceDebugInspectorView: View {
         }
     }
     
-    func workspaceDetail(for selectedWorkspace: WorkspaceInfo) -> some View {
-        VStack(alignment: .leading) {
+    func workspaceDetail(for workspace: WorkspaceController) -> some View {
+        let entries = workspace.info.entries
+        
+        return VStack(alignment: .leading) {
             Group {
-                Text("ID: \(Text(selectedWorkspace.id.uuidString).monospaced())")
-                Text("Page: \(Text(selectedWorkspace.currentPage?.friendlyName ?? "<nil>").monospaced())")
+                Text("ID: \(Text(workspace.id.uuidString).monospaced())")
+                Text("Page: \(Text(workspace.currentPage?.friendlyName ?? "<nil>").monospaced())")
             }
             .foregroundStyle(.secondary)
             
             Divider()
             
-            Text("Entries (\(selectedWorkspace.entries.count))")
+            Text("Entries (\(entries.count))")
                 .font(.headline)
             
-            if !selectedWorkspace.entries.isEmpty {
-                List(selectedWorkspace.entries) { entry in
+            if !entries.isEmpty {
+                List(entries) { entry in
                     Button {
-                        selectedWorkspace.entrySelection = selectedWorkspace.entrySelection == nil ? entry : nil
+                        workspace.entrySelection = workspace.entrySelection == nil ? entry : nil
                     } label: {
                         HStack {
                             Text(entry.name).font(.body)
                             Spacer()
-                            Badge(text: "Selected", visible: entry == selectedWorkspace.entrySelection)
+                            Badge(text: "Selected", visible: entry == workspace.entrySelection)
                         }
                     }
                     .buttonStyle(.borderless)
@@ -91,7 +93,7 @@ struct WorkspaceDebugInspectorView: View {
             }
         }
         .padding()
-        .navigationTitle(selectedWorkspace.entrySelection?.name ?? "Workspace \(selectedWorkspace.id.uuidString.prefix(6))")
+        .navigationTitle(workspace.entrySelection?.name ?? "Workspace \(workspace.id.uuidString.prefix(6))")
     }
 }
 
@@ -115,7 +117,7 @@ extension WorkspaceDebugInspectorView {
 #Preview {
     @Previewable @State var registry: WorkspaceRegistry = .registryForPreviews
     
-    var activeWorkspace: WorkspaceInfo? { registry.workspaces.first }
+    var activeWorkspace: WorkspaceController? { registry.workspaces.first }
     
     WorkspaceDebugInspectorView(activeWorkspace: activeWorkspace)
         .environment(registry)

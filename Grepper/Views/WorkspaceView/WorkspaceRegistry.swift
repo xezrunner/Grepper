@@ -4,24 +4,26 @@ import SwiftUI
 import Observation
 
 @MainActor @Observable class WorkspaceRegistry {
-    var workspaces: [WorkspaceInfo] = []
+    var workspaces: [WorkspaceController] = []
     
-    func register(_ workspace: WorkspaceInfo) {
+    func register(_ workspace: WorkspaceController) {
         workspaces.append(workspace)
     }
-    func unregister(_ workspace: WorkspaceInfo) {
+    func unregister(_ workspace: WorkspaceController) {
         workspaces.removeAll(where: { $0 == workspace })
     }
     
-    var debugInspector_fromWorkspace: WorkspaceInfo?
+    var debugInspector_fromWorkspace: WorkspaceController?
 }
 
 extension WorkspaceRegistry {
     static var registryForPreviews: WorkspaceRegistry {
         let registry = WorkspaceRegistry()
         
+        let workspace = WorkspaceController.defaultWorkspace
         registry.workspaces.append(.defaultWorkspace)
-        registry.workspaces.first?.entries.append(.init())
+        
+        if let entry = WorkspaceEntry.create() { workspace.addEntry(entry) }
         
         registry.workspaces.append(.defaultWorkspace)
         registry.debugInspector_fromWorkspace = registry.workspaces.first!

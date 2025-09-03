@@ -4,20 +4,19 @@ import SwiftUI
 struct ContentView: View {
     @Environment(WorkspaceRegistry.self) var workspaceRegistry
     
-    @State var workspaceInfo: WorkspaceInfo // Each window gets its own workspace
+    // Each window gets its own workspace:
+    @State var workspaceController: WorkspaceController
     
-    @State var activeWorkspace: WorkspaceInfo?
-
-    init(workspaceInfo: WorkspaceInfo? = nil) {
-        self._workspaceInfo = State(initialValue: workspaceInfo ?? .defaultWorkspace)
+    init(workspaceController: WorkspaceController? = nil) {
+        self.workspaceController = workspaceController ?? .defaultWorkspace
     }
     
     var body: some View {
-        WorkspaceView(workspaceInfo: workspaceInfo)
-            .onAppear    { workspaceRegistry.register(workspaceInfo) }
-            .onDisappear { workspaceRegistry.unregister(workspaceInfo) }
+        WorkspaceView(workspace: workspaceController)
+            .onAppear    { workspaceRegistry.register  (workspaceController) }
+            .onDisappear { workspaceRegistry.unregister(workspaceController) }
         
-            .focusedSceneValue(workspaceInfo)
+            .focusedSceneValue(workspaceController)
     }
 }
 

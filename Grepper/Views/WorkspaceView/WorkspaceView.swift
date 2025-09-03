@@ -5,14 +5,14 @@ import SwiftUI
 enum WorkspaceViewPage: Codable, Hashable, Identifiable {
     var id: UUID { UUID() } // TEMP
     
-    case entry(entry: WorkspaceEntry)
-    case entrySettings(entry: WorkspaceEntry)
+    case entry(with: WorkspaceEntry)
+    case entrySettings(with: WorkspaceEntry)
     case workspaceSettings
     
     var entry: WorkspaceEntry? {
         switch self {
-            case .entry        (entry: let e): return e
-            case .entrySettings(entry: let e): return e
+            case .entry        (with: let entry): return entry
+            case .entrySettings(with: let entry): return entry
             default: return nil
         }
     }
@@ -27,8 +27,9 @@ enum WorkspaceViewPage: Codable, Hashable, Identifiable {
 }
 
 struct WorkspaceView: View {
-    var workspaceInfo: WorkspaceInfo
-    var navigation: WorkspaceNavigation { workspaceInfo.navigation }
+    var workspace: WorkspaceController
+    
+    var navigation:    WorkspaceNavigation { workspace.info.navigation }
     
     var body: some View {
         NavigationSplitView {
@@ -39,24 +40,24 @@ struct WorkspaceView: View {
     }
     
     @ViewBuilder var sidebar: some View {
-        if workspaceInfo.entries.isEmpty { emptySidebar }
+        if workspace.info.entries.isEmpty { emptySidebar }
         else                             { workspaceSidebar }
     }
     
-    @ViewBuilder var detail: some View {
-        Group {
-            if workspaceInfo.entries.isEmpty { emptyDetail }
+    var detail: some View {
+        ZStack {
+            if workspace.info.entries.isEmpty { emptyDetail }
             else {
-                if workspaceInfo.currentPage == nil { noSelectionDetail }
+                if workspace.currentPage == nil { noSelectionDetail }
                 else                                { workspaceDetail }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom) { if WORKSPACE_UI_DEBUG_STRIP { WorkspaceViewDebugStrip(workspaceInfo: workspaceInfo) } }
+        .safeAreaInset(edge: .bottom) { if WORKSPACE_UI_DEBUG_STRIP { WorkspaceViewDebugStrip(workspace: workspace) } }
     }
 }
 
 #Preview {
-    WorkspaceView(workspaceInfo: .defaultWorkspace)
+    WorkspaceView(workspace: .defaultWorkspace)
         .environment(WorkspaceRegistry())
 }

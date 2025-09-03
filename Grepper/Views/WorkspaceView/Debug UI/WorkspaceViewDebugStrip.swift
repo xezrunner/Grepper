@@ -8,22 +8,22 @@ struct WorkspaceViewDebugStrip: View {
     @Environment(WorkspaceRegistry.self) private var workspaceRegistry
     @Environment(\.openWindow) private var openWindow
     
-    @FocusedValue(WorkspaceInfo.self) var activeWorkspace
+    @FocusedValue(WorkspaceController.self) var activeWorkspace
     
-    var workspaceInfo: WorkspaceInfo?
+    var workspace: WorkspaceController?
     
     func openDebugInspector() {
-        workspaceRegistry.debugInspector_fromWorkspace = workspaceInfo
+        workspaceRegistry.debugInspector_fromWorkspace = workspace
         openWindow(id: WORKSPACE_DEBUG_INSPECTOR_SCENE_ID)
     }
     
     var body: some View {
         HStack(spacing: 4) {
-            if let workspaceInfo = workspaceInfo {
+            if let workspace {
                 if workspaceRegistry.workspaces.count > 1 {
-                    Text("\(workspaceInfo.id.uuidString) |")
+                    Text("\(workspace.id.uuidString) |")
                 }
-                Text("entries: \(workspaceInfo.entries.count) [\(workspaceInfo.entrySelection?.name ?? "<none>")]")
+                Text("entries: \(workspace.info.entries.count) [\(workspace.entrySelection?.name ?? "<none>")]")
             }
             else {
                 Text("No workspace selected").foregroundStyle(.secondary)
@@ -42,7 +42,7 @@ struct WorkspaceViewDebugStrip: View {
 #Preview {
     @Previewable @State var registry: WorkspaceRegistry = .registryForPreviews
 
-    var activeWorkspace: WorkspaceInfo? { registry.workspaces.first }
+    var activeWorkspace: WorkspaceController? { registry.workspaces.first }
     
     VStack {
         Text("< content >")
