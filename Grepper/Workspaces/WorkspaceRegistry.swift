@@ -20,13 +20,8 @@ extension WorkspaceRegistry {
     static var registryForPreviews: WorkspaceRegistry {
         let registry = WorkspaceRegistry()
         
-        let workspace = WorkspaceController.defaultWorkspace
         registry.workspaces.append(.defaultWorkspace)
-        
-//        if let entry = WorkspaceEntry.create() { workspace.addEntry(entry) }
-        
-        registry.workspaces.append(.defaultWorkspace)
-        registry.debugInspector_fromWorkspace = registry.workspaces.first! // TODO: why?
+        registry.debugInspector_fromWorkspace = registry.workspaces.first!
         
         return registry
     }
