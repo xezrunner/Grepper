@@ -23,10 +23,10 @@ extension WorkspaceRegistry {
         let workspace = WorkspaceController.defaultWorkspace
         registry.workspaces.append(.defaultWorkspace)
         
-        if let entry = WorkspaceEntry.create() { workspace.addEntry(entry) }
+//        if let entry = WorkspaceEntry.create() { workspace.addEntry(entry) }
         
         registry.workspaces.append(.defaultWorkspace)
-        registry.debugInspector_fromWorkspace = registry.workspaces.first!
+        registry.debugInspector_fromWorkspace = registry.workspaces.first! // TODO: why?
         
         return registry
     }

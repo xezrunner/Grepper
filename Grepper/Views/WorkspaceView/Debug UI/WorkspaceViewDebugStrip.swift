@@ -23,7 +23,7 @@ struct WorkspaceViewDebugStrip: View {
                 if workspaceRegistry.workspaces.count > 1 {
                     Text("\(workspace.id.uuidString) |")
                 }
-                Text("entries: \(workspace.info.entries.count) [\(workspace.entrySelection?.name ?? "<none>")]")
+                Text("entries: \(workspace.info.entries.count) [\(workspace.entrySelection?.displayName ?? "<none>")]")
             }
             else {
                 Text("No workspace selected").foregroundStyle(.secondary)

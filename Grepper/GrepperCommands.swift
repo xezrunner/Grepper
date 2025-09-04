@@ -21,7 +21,12 @@ enum GrepperCommands {
     static func OpenEntry(for workspaceController: WorkspaceController) {
         FilePicker.pick(allowDirectories: true) { url in
             guard let url else { return }
-            workspaceController.addEntry(from: url, navigate: true)
+            do {
+                try workspaceController.addEntry(from: url, navigate: true)
+            } catch {
+                // FIXME: handle errror! UI?
+                print("⚠️ Failed to open entry: \(error)")
+            }
         }
     }
 }

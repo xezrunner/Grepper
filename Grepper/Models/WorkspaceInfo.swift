@@ -1,7 +1,7 @@
 // Grepper::WorkspaceInfo.swift - 28/08/2025
 import SwiftUI
 
-@Observable class WorkspaceInfo: Codable, Hashable, Identifiable {
+class WorkspaceInfo: Codable, Hashable, Identifiable {
     var id: UUID = UUID()
     
     var entries: [WorkspaceEntry] = []

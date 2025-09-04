@@ -77,23 +77,22 @@ struct WorkspaceDebugInspectorView: View {
                         workspace.entrySelection = workspace.entrySelection == nil ? entry : nil
                     } label: {
                         HStack {
-                            Text(entry.name).font(.body)
+                            Text(entry.displayName).font(.body)
                             Spacer()
                             Badge(text: "Selected", visible: entry == workspace.entrySelection)
                         }
                     }
                     .buttonStyle(.borderless)
                 }
-                #if os(macOS)
+#if os(macOS)
                 .alternatingRowBackgrounds()
-                #endif
+#endif
             } else {
-                Text("No entries")
-                    .foregroundStyle(.secondary)
+                Text("No entries").foregroundStyle(.secondary)
             }
         }
         .padding()
-        .navigationTitle(workspace.entrySelection?.name ?? "Workspace \(workspace.id.uuidString.prefix(6))")
+        .navigationTitle(workspace.entrySelection?.displayName ?? "Workspace \(workspace.id.uuidString.prefix(6))")
     }
 }
 

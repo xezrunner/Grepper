@@ -2,10 +2,14 @@
 import SwiftUI
 
 extension WorkspaceView {
+    func sidebarEntry(with entry: WorkspaceEntry) -> some View {
+        let tag = WorkspaceViewPage.entry(with: entry)
+        return Text(entry.displayName).tag(tag)
+    }
+    
     var workspaceSidebar: some View {
         List(workspace.info.entries, selection: navigation._currentPage) { entry in
-            let tag = WorkspaceViewPage.entry(with: entry)
-            Text(entry.name).tag(tag)
+            sidebarEntry(with: entry)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

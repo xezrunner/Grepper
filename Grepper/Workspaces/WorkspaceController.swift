@@ -17,9 +17,14 @@ import SwiftUI
         if navigate { entrySelection = entry }
     }
     
-    func addEntry(from url: URL, navigate: Bool = true) {
-        guard let entry = WorkspaceEntry.create(from: url) else { return }
-        if navigate { entrySelection = entry }
+    func addEntry(from url: URL, navigate: Bool = true) throws {
+        do {
+            let entry = try WorkspaceEntry.create(from: url)
+            info.entries.append(entry)
+            if navigate { entrySelection = entry }
+        } catch {
+            throw error
+        }
     }
     
     var currentPage: WorkspaceViewPage? {
@@ -55,7 +60,8 @@ extension WorkspaceController {
                 _defaultWorkspaceDebugMessageShown.toggle()
             }
             
-            if let entry = WorkspaceEntry.create(from: url) { info.entries.append(entry) }
+            let entry = try! WorkspaceEntry.create(from: url)
+            info.entries.append(entry)
         }
         
         return .init(with: info)

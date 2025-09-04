@@ -19,8 +19,8 @@ enum WorkspaceViewPage: Codable, Hashable, Identifiable {
     
     var friendlyName: String { // Mainly for back/forward navigation:
         switch self {
-            case .entry:             "\(entry?.name ?? "<nil>")"
-            case .entrySettings:     "Settings for \(entry?.name ?? "<nil>")"
+            case .entry:             "\(entry?.displayName ?? "<nil>")"
+            case .entrySettings:     "Settings for \(entry?.displayName ?? "<nil>")"
             case .workspaceSettings: "Workspace settings"
         }
     }
