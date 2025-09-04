@@ -42,6 +42,7 @@ struct WorkspaceDebugInspectorView: View {
             }
             .tag(workspace)
         }
+        .toolbar(removing: .sidebarToggle)
         .navigationTitle("Workspaces")
         .navigationSplitViewColumnWidth(min: 150, ideal: 220)
     }
@@ -54,6 +55,31 @@ struct WorkspaceDebugInspectorView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .navigationTitle("Workspace Details")
         }
+    }
+    
+    func workspaceEntryRowButton(with workspace: WorkspaceController, for entry: WorkspaceEntry) -> some View {
+        Button {
+            if let selected = workspace.entrySelection { workspace.entrySelection = (entry == selected) ? nil : entry }
+            else { workspace.entrySelection = entry }
+        } label: {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(entry.displayName).bold().font(.callout)
+                    Text("\(entry.id.uuidString)  type: \(entry.typeName)").font(.footnote)
+                    Group {
+                        switch entry.self {
+                            case .file  (let file):   if let error = file.error   { Text("⚠️ Error: \(error)") }
+                            case .folder(let folder): if let error = folder.error { Text("⚠️ Error: \(error)") }
+                            case .group: EmptyView()
+                        }
+                    }
+                }
+                .monospaced().font(.footnote)
+                Spacer()
+                Badge(text: "Selected", visible: entry == workspace.entrySelection)
+            }
+        }
+        .buttonStyle(.borderless)
     }
     
     func workspaceDetail(for workspace: WorkspaceController) -> some View {
@@ -73,16 +99,14 @@ struct WorkspaceDebugInspectorView: View {
             
             if !entries.isEmpty {
                 List(entries) { entry in
-                    Button {
-                        workspace.entrySelection = workspace.entrySelection == nil ? entry : nil
-                    } label: {
-                        HStack {
-                            Text(entry.displayName).font(.body)
-                            Spacer()
-                            Badge(text: "Selected", visible: entry == workspace.entrySelection)
-                        }
+                    switch entry.self {
+                        case .file:
+                            workspaceEntryRowButton(with: workspace, for: entry)
+                        default:
+                            OutlineGroup(entry, children: \.children) { subentry in
+                                workspaceEntryRowButton(with: workspace, for: subentry)
+                            }
                     }
-                    .buttonStyle(.borderless)
                 }
 #if os(macOS)
                 .alternatingRowBackgrounds()
@@ -92,7 +116,7 @@ struct WorkspaceDebugInspectorView: View {
             }
         }
         .padding()
-        .navigationTitle(workspace.entrySelection?.displayName ?? "Workspace \(workspace.id.uuidString.prefix(6))")
+        .navigationTitle("Workspace \(workspace.id.uuidString.prefix(6))")
     }
 }
 
@@ -121,3 +145,4 @@ extension WorkspaceDebugInspectorView {
     WorkspaceDebugInspectorView(activeWorkspace: activeWorkspace)
         .environment(registry)
 }
+

@@ -6,15 +6,15 @@ protocol WorkspaceGroupItem: Codable, Identifiable, Hashable {
 
     var displayName: String { get }
 }
-extension WorkspaceGroupItem {
-    var id: UUID { UUID() }
-}
 
 // TODO: factor out into files
-// TODO: do these need to be classes?  @Perf
 struct WorkspaceFile: WorkspaceGroupItem {
+    var id = UUID()
+    
     var name: String?
     var url: URL
+    
+    var _error: String?
     
     fileprivate init(name: String? = nil, url: URL) {
         self.name = name
@@ -25,75 +25,110 @@ struct WorkspaceFile: WorkspaceGroupItem {
         if let name { name } else { url.lastPathComponent }
     }
     
-    var isAccessible: (result: Bool, error: String?) {
-        if url.hasDirectoryPath { return (false, "Workspace file \(displayName) has a path to a folder.") }
-        
-        do    { return (try url.checkResourceIsReachable(), nil) }
-        catch { return (false, "\(error)") }
-        
-        return (false, nil)
-    }
+    var error: String? { _error }
 }
 
 struct WorkspaceGroup: WorkspaceGroupItem {
+    var id = UUID()
+    
     var name: String?
     var items: [WorkspaceEntry] = []
     
-    var displayName: String {
-        if let name { name } else { "Group \(id.uuidString)" } // TODO: nicer auto name
-    }
+    var displayName: String { name ?? "Group \(id.uuidString)" } // TODO: nicer auto name
 }
 
 struct WorkspaceFolder: WorkspaceGroupItem {
+    var id = UUID()
+    
     // TODO: when the user wants to put other files into a folder, convert to a group
     
     var url: URL
-    var group: WorkspaceGroup
     
-    fileprivate init(url: URL) {
+    var group: WorkspaceGroup?
+    
+    var _error: String?
+    
+    fileprivate init(name: String? = nil, url: URL) {
         self.url = url
-        self.group = .init(name: "\(url.lastPathComponent)", items: []) // TODO: get files
+        
+        do {
+            let accessing = url.startAccessingSecurityScopedResource()
+            defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+            
+            let folderContents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) // TODO: let .skipsHiddenFiles be configurable  @Settings
+            let items = folderContents.compactMap({ try? WorkspaceEntry.create(from: $0) })
+            
+            self.group = .init(name: name ?? "📁 \(url.lastPathComponent)", items: items) // TODO: get files
+        } catch {
+            // FIXME: Error UI
+            self._error = error.localizedDescription
+            print("⚠️ WorkspaceFolder init() fail: \(error)")
+        }
     }
     
-    var displayName: String { group.displayName }
+    var displayName: String { group?.name ?? url.lastPathComponent } // TODO: how should we name and present folders?
     
     var isAccessible: (result: Bool, error: String?) {
-        if !url.hasDirectoryPath { return (false, "Workspace folder \(displayName) has a path to a file.") }
+        if group == nil { return (false, "Group not initialized") }
         
-        do    { return (try url.checkResourceIsReachable(), nil) }
-        catch { return (false, "\(error)") }
-        
-        return (false, nil)
+        return (true, nil)
     }
+    
+    var error: String? { _error ?? isAccessible.error }
 }
 
 enum WorkspaceEntryError: Error {
-    case pathNotReachable
+    case pathDoesNotExist
+    case pathInvalidType
 }
 
 enum WorkspaceEntry: Codable, Hashable, Identifiable {
-    var id: UUID { UUID() }
+    var id: UUID { 
+        switch self {
+            case .file  (let it): it.id
+            case .folder(let it): it.id
+            case .group (let it): it.id 
+        }
+    }
     
     case file  (WorkspaceFile)
-    case group (WorkspaceGroup)
     case folder(WorkspaceFolder)
+    case group (WorkspaceGroup)
     
     var displayName: String {
         switch self {
             case .file  (let it): it.displayName
-            case .group (let it): it.displayName
             case .folder(let it): it.displayName
+            case .group (let it): it.displayName
+        }
+    }
+
+    var children: [WorkspaceEntry]? {
+        switch self {
+            case .folder(let it): it.group?.items
+            case .group (let it): it.items
+            default:              nil
+
+        }
+    }
+
+    var typeName: String {
+        switch self {
+            case .file  : "file"
+            case .folder: "folder"
+            case .group : "group"
         }
     }
     
     static func create(from url: URL) throws -> WorkspaceEntry {
-        do    { if try !url.checkResourceIsReachable() { throw WorkspaceEntryError.pathNotReachable } }
-        catch { throw error }
+        let url = url.resolvingSymlinksInPath() // TODO: should we allow controlling this?  @Settings
         
-        if !url.hasDirectoryPath {
-            return WorkspaceEntry.file(.init(url: url))
-        } else {
-            return WorkspaceEntry.folder(.init(url: url))
-        }
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory)
+        
+        if !exists { throw WorkspaceEntryError.pathDoesNotExist }
+        
+        if !isDirectory.boolValue { return WorkspaceEntry.file  (.init(url: url)) }
+        else                      { return WorkspaceEntry.folder(.init(url: url)) }
     }
 }

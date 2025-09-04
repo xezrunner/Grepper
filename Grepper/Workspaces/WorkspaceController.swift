@@ -60,9 +60,13 @@ extension WorkspaceController {
                 _defaultWorkspaceDebugMessageShown.toggle()
             }
             
-            let entry = try! WorkspaceEntry.create(from: url)
-            info.entries.append(entry)
+            info.entries.append(try! WorkspaceEntry.create(from: url))
         }
+        
+        do {
+            let entry = try WorkspaceEntry.create(from: .init(filePath: "~/Desktop"))
+            info.entries.append(entry)
+        } catch { }
         
         return .init(with: info)
     }

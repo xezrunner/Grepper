@@ -24,7 +24,7 @@ enum GrepperCommands {
             do {
                 try workspaceController.addEntry(from: url, navigate: true)
             } catch {
-                // FIXME: handle errror! UI?
+                // FIXME: Error UI
                 print("⚠️ Failed to open entry: \(error)")
             }
         }
