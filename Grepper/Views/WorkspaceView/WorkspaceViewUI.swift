@@ -16,8 +16,14 @@ extension WorkspaceView {
     }
     
     var workspaceDetail: some View {
-        return VStack {
-            Text("< workspace detail >")
+        VStack {
+            if let entry = workspace.entrySelection {
+                switch entry {
+                    case .file(let file): WorkspaceFile_ListView(file: file)
+                    default: Text("< selection, of type \(entry.typeName) >")
+                }
+            }
+            else { Text("< no selection >") }
         }
         .toolbar { sidebarNavigationToolbarGroup }
     }
@@ -61,12 +67,3 @@ struct WorkspaceView_Sidebar {
         }
     }
 }
-
-struct WorkspaceView_ListView: View {
-    var workspaceInfo: WorkspaceInfo
-    
-    var body: some View {
-        Text("< list view >")
-    }
-}
-
