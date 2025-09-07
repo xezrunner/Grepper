@@ -15,9 +15,17 @@ struct WorkspaceFile: WorkspaceItem {
     
     var _error: String?
     
+    var grepper: Grepper
+    
     init(name: String? = nil, url: URL) {
         self.name = name
         self.url = url
+        
+        // FIXME: I would have preferred to pass a WorkspaceFile to Grepper (self in this case),
+        // but that doesn't really work with structs. Should these even be structs?
+        // There might be some performance concerns if let's say we'll have groups and we'll want to
+        // add/remove/re-order entries (?)
+        self.grepper = .init(with: url)
     }
     
     var displayName: String {

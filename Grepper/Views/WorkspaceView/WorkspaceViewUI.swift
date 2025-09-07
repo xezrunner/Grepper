@@ -16,10 +16,11 @@ extension WorkspaceView {
     }
     
     var workspaceDetail: some View {
-        VStack {
+        VStack(alignment: .leading) {
             if let entry = workspace.entrySelection {
                 switch entry {
-                    case .file(let file): WorkspaceFile_ListView(file: file)
+                    case .file(let file):
+                        WorkspaceFile_ListView(file: file)
                     default: Text("< selection, of type \(entry.typeName) >")
                 }
             }
